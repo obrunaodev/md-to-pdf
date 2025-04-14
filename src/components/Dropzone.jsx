@@ -1,19 +1,23 @@
-import React, { useState, useCallback } from 'react';
+import React, {useState, useCallback, useContext} from 'react';
 import { useDropzone } from 'react-dropzone';
 import _ from 'lodash';
 import mdjs from "@moox/markdown-to-json";
 import {PDFDownloadLink, PDFViewer} from "@react-pdf/renderer";
-import EbookPdfDocument from "@/components/EbookPdfDocument";
+import EbookPdfDocument from "@/components/EbookPDF";
+import {useRouter, useSearchParams} from "next/navigation";
+import {GlobalContext} from "@/context/GlobalContext";
 
 function Dropzone() {
+  const {jsonData, setJsonData} = useContext(GlobalContext);
   const [dragging, setDragging] = useState(false);
   const [progress, setProgress] = useState(0);
   const [file, setFile] = useState(null);
-  const [jsonMd, setJsonMd] = useState(null);
+
+  const router = useRouter()
 
   const onDrop = useCallback((acceptedFiles) => {
-    const _file = _.get(acceptedFiles, 0, null);
-    setFile(_file);
+    const droppedFile = _.get(acceptedFiles, 0, null);
+    setFile(droppedFile)
     setProgress(0);
 
     const reader = new FileReader();
@@ -25,14 +29,16 @@ function Dropzone() {
 
     reader.onload = () => {
       setDragging(false);
+      const jsonResult = mdjs.markdownAsJsTree(reader.result)
+      setJsonData(jsonResult);
     };
 
-    reader.readAsText(_file)
+    reader.readAsText(droppedFile)
   }, []);
 
   const onClear = useCallback( () => {
-    setFile(null);
-    setJsonMd(null);
+    setFile(null)
+    setJsonData(null)
     setProgress(0);
     setDragging(false);
   }, []);
@@ -47,21 +53,20 @@ function Dropzone() {
     onDragLeave: () => setDragging(false),
   }
 
+
   const onPreview = () => {
     const reader = new FileReader();
 
     reader.onload = () => {
-      // const converter = new showdown.Converter();
-      // const html = converter.makeHtml(reader.result)
-      setJsonMd(mdjs.markdownAsJsTree(reader.result));
+      const jsonResult = mdjs.markdownAsJsTree(reader.result)
+      setJsonData(jsonResult);
+      router.push('/preview');
     }
 
     reader.readAsText(file);
   }
 
   const { getRootProps, getInputProps, open } = useDropzone(dropzoneConfig);
-
-  console.log(jsonMd)
 
   return (
     <div className="flex flex-col items-center justify-center w-full">
@@ -86,9 +91,9 @@ function Dropzone() {
         </div>
       </div>
 
-      {(file) && (<div className="w-full mt-4">
+      {_.isNil(file) || (<div className="w-full mt-4">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-sm font-medium text-gray-700">Uploading: {_.get(file, 'name', null)}</span>
+            <span className="text-sm font-medium text-gray-700">Uploading: {_.get(jsonData, 'name', null)}</span>
             <span className="text-sm font-medium text-gray-700">{progress}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -96,33 +101,41 @@ function Dropzone() {
           </div>
         </div>)}
 
-      {file ? (
+      {_.isNil(file) ? (
+        <button type="button" onClick={open}
+                className="font-medium mt-4 text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-100 rounded-lg text-sm px-5 py-2.5 focus:outline-none">
+          Select File
+        </button>
+      ) : (
         <div className="flex gap-x-4 items-center justify-between">
           <button type="button" onClick={onClear}
                   className="font-medium mt-4 text-white bg-yellow-500 hover:bg-yellow-600 focus:ring-4 focus:ring-yellow-100 rounded-lg text-sm px-5 py-2.5 focus:outline-none">
             Clear
           </button>
-          {jsonMd && (<div
-            className="font-medium mt-4 text-white bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-100 rounded-lg text-sm px-5 py-2.5 focus:outline-none">
-            <PDFDownloadLink
-              document={<EbookPdfDocument data={jsonMd}/>}
-              fileName={`${jsonMd?.title ? jsonMd.title.replace(/\s+/g, '_') : 'ebook'}.pdf`}
-            >
-              {({blob, url, loading, error}) =>
-                loading ? 'Generating PDF...' : 'Download PDF'
-              }
-            </PDFDownloadLink>
-          </div>)}
+
+
+            <button
+              disabled={_.isNil(jsonData)}
+              className="disabled:cursor-not-allowed disabled:opacity-40 font-medium mt-4 text-white bg-red-500 enabled:hover:bg-red-600 focus:ring-4 enabled:focus:ring-red-100 rounded-lg text-sm px-5 py-2.5 focus:outline-none">
+              {_.isNil(jsonData) ? 'Download PDF' : (
+                <PDFDownloadLink
+                  document={<EbookPdfDocument data={jsonData}/>}
+                  fileName={`${jsonData?.title ? jsonData.title.replace(/\s+/g, '_') : 'ebook'}.pdf`}
+                >
+                  {({blob, url, loading, error}) =>
+                    loading ? 'Generating PDF...' : 'Download PDF'
+                  }
+                </PDFDownloadLink>
+              )}
+            </button>
+
+
           <button type="button" onClick={onPreview}
                   className="font-medium mt-4 text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-100 rounded-lg text-sm px-5 py-2.5 focus:outline-none">
             Preview
           </button>
         </div>
-      ) : (
-        <button type="button" onClick={open}
-               className="font-medium mt-4 text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:ring-blue-100 rounded-lg text-sm px-5 py-2.5 focus:outline-none">
-        Select File
-      </button>
+
       )}
     </div>
   );
