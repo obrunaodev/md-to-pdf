@@ -5,31 +5,40 @@ import {
   Text,
   View,
   Link,
+  Font,
   StyleSheet
 } from '@react-pdf/renderer';
+
+  Font.register({ family: 'Telegraf', src: '/fonts/TelegrafUltraBold.ttf'  });
+  Font.register({ family: 'OperatorMono', src: '/fonts/OperatorMonoLight.ttf'  });
+  Font.register({ family: 'Lato', fonts: [ { src: '/fonts/LatoRegular.ttf' },
+      { src: '/fonts/LatoItalic.ttf' , fontStyle: 'italic' }, { src: '/fonts/LatoBold.ttf' , fontWeight: 'bold' }]  });
 
 // Define styles
 const styles = StyleSheet.create({
   page: {
     padding: 30,
-    fontFamily: 'Helvetica',
+    paddingTop: 48,
     fontSize: 10,
-    lineHeight: 1.5,
-    color: '#333',
+    lineHeight: 1.4,
+    backgroundColor: '#F5F5F5',
+    color: '#1f2122',
     display: 'flex',
     flexDirection: 'column',
+    fontFamily: 'Lato',
+    position: 'relative',
   },
-  h1: { fontSize: 32, marginBottom: 8, fontWeight: 'bold', textAlign: 'center', display: 'block', lineHeight: 1.5 },
-  h2: { fontSize: 14, marginBottom: 7, fontWeight: 'bold' },
-  h3: { fontSize: 12, marginBottom: 6, fontWeight: 'bold' },
-  h4: { fontSize: 10, marginBottom: 5, fontWeight: 'bold' },
-  p: { marginBottom: 4, textAlign: 'justify' },
-  ul: { marginBottom: 4, paddingLeft: 4, display: 'block' },
-  ol: { marginBottom: 4, paddingLeft: 4, display: 'block' },
-  li: { marginBottom: 2, display: 'inline', textAlign: 'justify' },
-  nestedList: { marginLeft: 4 },
-  a: { color: 'blue', textDecoration: 'underline', textAlign: 'justify' },
-  code: { fontFamily: 'Courier', backgroundColor: '#f4f4f4', padding: 2, fontSize: 8, borderRadius: 4 },
+  h1: { fontSize: 28, paddingBottom: 5, fontWeight: 'bold', textAlign: 'center', display: 'block', lineHeight: 1.25, fontFamily: 'Telegraf' },
+  h2: { fontSize: 14, paddingBottom: 4, fontWeight: 'bold', fontFamily: 'Telegraf' },
+  h3: { fontSize: 12, paddingBottom: 3, paddingTop: 6, fontWeight: 'bold', fontFamily: 'Telegraf' },
+  h4: { fontSize: 10, paddingBottom: 2, paddingTop: 4, fontWeight: 'bold', fontFamily: 'Telegraf' },
+  p: { paddingBottom: 4, textAlign: 'justify' },
+  ul: { paddingBottom: 4, paddingLeft: 4, display: 'block' },
+  ol: { paddingBottom: 4, paddingLeft: 4, display: 'block' },
+  li: { paddingBottom: 2, display: 'inline', textAlign: 'justify' },
+  nestedList: { paddingLeft: 4 },
+  a: { color: '#ff03f0', textDecoration: 'underline', textAlign: 'justify', fontWeight: 'bold' },
+  code: { fontFamily: 'OperatorMono', backgroundColor: '#ff03f080', fontSize: 9, lineHeight: 1, paddingHorizontal: 2, display: 'block' },
   strong: { fontWeight: 'bold' },
   em: { fontStyle: 'italic' },
   span: {textAlign: 'justify'},
@@ -40,6 +49,7 @@ const styles = StyleSheet.create({
 
 // Main Document component built with react-pdf
 export default function EbookPDF({ data }) {
+
   // Recursive function to render nodes based on tag names
   const renderNode = (node, key) => {
     // If node is plain text, return a Text element if not empty.
@@ -111,7 +121,7 @@ export default function EbookPDF({ data }) {
           </Link>
         );
       case 'code':
-        return <Text key={key} style={styles.code}>{children}</Text>;
+        return <Text key={key} style={styles.code}> {children} </Text>;
       case 'strong':
         return <Text key={key} style={styles.strong}>{children}</Text>;
       case 'em':
@@ -148,20 +158,34 @@ export default function EbookPDF({ data }) {
   const pageSegments = splitIntoPages(data.body);
   return (
     <Document>
-      {pageSegments.map((segment, idx) => (
-        <Page
-          key={idx}
-          size="A5"
-          style={
-            idx === 0
-              ? { ...styles.page, justifyContent: 'center', alignItems: 'center' }
-              : styles.page
-          }
-          wrap
-        >
-          {segment.map((node, index) => renderNode(node, index))}
-        </Page>
-      ))}
+      {pageSegments.map((segment, idx) => {
+        if (idx === 0) {
+          return (
+            <Page
+              key={idx}
+              size="A5"
+              style={{...styles.page, justifyContent: 'center', alignItems: 'center'}}
+              wrap
+            >
+              {segment.map((node, index) => renderNode(node, index))}
+            </Page>
+          )
+        }
+        return (
+          <Page
+            key={idx}
+            size="A5"
+            style={styles.page}
+            wrap
+          >
+            <Text fixed style={{position: 'absolute', top: 0, left: 0, right: 0, width: '100%', height: 10, backgroundColor: '#1f2122'}}/>
+            <Text fixed style={{position: 'absolute', top: 18, left: 0, right: 0, width: '100%', height: 4, backgroundColor: '#1f2122'}}/>
+
+            {segment.map((node, index) => renderNode(node, index))}
+              <Text fixed style={{position: 'absolute', bottom: 0, left: 0, right: 0, width: '100%', height: 4, backgroundColor: '#ff03f0'}}/>
+          </Page>
+        )
+      })}
     </Document>
   );
 };
