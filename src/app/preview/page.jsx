@@ -1,6 +1,6 @@
 'use client'
 
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext} from 'react';
 import {PDFViewer} from "@react-pdf/renderer";
 import EbookPDF from "@/components/EbookPDF";
 import {redirect, useSearchParams} from "next/navigation";
@@ -8,12 +8,14 @@ import _ from "lodash";
 import {GlobalContext} from "@/context/GlobalContext";
 
 export default function PreviewPage() {
-  const {jsonData, setJsonData} = useContext(GlobalContext);
+  const {jsonData} = useContext(GlobalContext);
 
   if (_.isEmpty(jsonData)) {
     redirect('/');
     return null;
   }
+
+  console.log(jsonData);
 
   return (
     <div className="w-full h-screen flex flex-col items-center justify-center">

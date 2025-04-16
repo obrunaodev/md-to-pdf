@@ -6,7 +6,7 @@ import {
   View,
   Link,
   Font,
-  StyleSheet
+  StyleSheet, Image
 } from '@react-pdf/renderer';
 
   Font.register({ family: 'Telegraf', src: '/fonts/TelegrafUltraBold.ttf'  });
@@ -16,19 +16,33 @@ import {
 
 // Define styles
 const styles = StyleSheet.create({
+  cover: {
+    padding: 30,
+    paddingTop: 48,
+    fontSize: 10,
+    lineHeight: 1.4,
+    backgroundColor: '#1f2122',
+    color: '#f5f5f5',
+    display: 'flex',
+    flexDirection: 'column',
+    fontFamily: 'Telegraf',
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   page: {
     padding: 30,
     paddingTop: 48,
     fontSize: 10,
     lineHeight: 1.4,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#f5f5f5',
     color: '#1f2122',
     display: 'flex',
     flexDirection: 'column',
     fontFamily: 'Lato',
     position: 'relative',
   },
-  h1: { fontSize: 28, paddingBottom: 5, fontWeight: 'bold', textAlign: 'center', display: 'block', lineHeight: 1.25, fontFamily: 'Telegraf' },
+  h1: { fontSize: 22, paddingBottom: 5, fontWeight: 'bold', textAlign: 'center', display: 'block', lineHeight: 1.25 },
   h2: { fontSize: 14, paddingBottom: 4, fontWeight: 'bold', fontFamily: 'Telegraf' },
   h3: { fontSize: 12, paddingBottom: 3, paddingTop: 6, fontWeight: 'bold', fontFamily: 'Telegraf' },
   h4: { fontSize: 10, paddingBottom: 2, paddingTop: 4, fontWeight: 'bold', fontFamily: 'Telegraf' },
@@ -38,11 +52,12 @@ const styles = StyleSheet.create({
   li: { paddingBottom: 2, display: 'inline', textAlign: 'justify' },
   nestedList: { paddingLeft: 4 },
   a: { color: '#ff03f0', textDecoration: 'underline', textAlign: 'justify', fontWeight: 'bold' },
-  code: { fontFamily: 'OperatorMono', backgroundColor: '#ff03f080', fontSize: 9, lineHeight: 1, paddingHorizontal: 2, display: 'block' },
+  code: { fontFamily: 'OperatorMono', backgroundColor: '#ff03f080', fontSize: 9, textDecoration: 'none' },
   strong: { fontWeight: 'bold' },
   em: { fontStyle: 'italic' },
   span: {textAlign: 'justify'},
   hr: {},
+  br: {},
   div: {},
   text: {display: 'inline'}
 });
@@ -121,7 +136,7 @@ export default function EbookPDF({ data }) {
           </Link>
         );
       case 'code':
-        return <Text key={key} style={styles.code}> {children} </Text>;
+        return <Text key={key} style={styles.code}>{children}</Text>;
       case 'strong':
         return <Text key={key} style={styles.strong}>{children}</Text>;
       case 'em':
@@ -164,13 +179,18 @@ export default function EbookPDF({ data }) {
             <Page
               key={idx}
               size="A5"
-              style={{...styles.page, justifyContent: 'center', alignItems: 'center'}}
+              style={styles.cover}
               wrap
             >
+              <Text fixed style={{position: 'absolute', top: 0, right: 42, width: 2, height: 172, backgroundColor: '#ff03f0'}}/>
+              <Image src='/logo.png' style={{position: 'absolute', top: 40, left: 0, right: 0, height: 192, objectFit: 'contain' }} />
               {segment.map((node, index) => renderNode(node, index))}
+              <Text fixed style={{position: 'absolute', bottom: 62, left: 0, width: 42, height: 110, backgroundColor: '#ff03f0'}}/>
             </Page>
           )
         }
+
+        let _pageNumber;
         return (
           <Page
             key={idx}
