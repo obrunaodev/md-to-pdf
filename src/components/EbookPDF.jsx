@@ -42,10 +42,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Lato',
     position: 'relative',
   },
-  h1: { fontSize: 22, paddingBottom: 5, fontWeight: 'bold', textAlign: 'center', display: 'block', lineHeight: 1.25 },
-  h2: { fontSize: 14, paddingBottom: 4, fontWeight: 'bold', fontFamily: 'Telegraf' },
-  h3: { fontSize: 12, paddingBottom: 3, paddingTop: 6, fontWeight: 'bold', fontFamily: 'Telegraf' },
-  h4: { fontSize: 10, paddingBottom: 2, paddingTop: 4, fontWeight: 'bold', fontFamily: 'Telegraf' },
+  h1: { fontSize: 22, paddingBottom: 5, textAlign: 'center', display: 'block', lineHeight: 1.25, fontFamily: 'Telegraf' },
+  h2: { fontSize: 14, paddingBottom: 4, fontFamily: 'Telegraf' },
+  h3: { fontSize: 12, paddingBottom: 3, paddingTop: 6, fontFamily: 'Telegraf' },
+  h4: { fontSize: 10, paddingBottom: 2, paddingTop: 4, fontFamily: 'Telegraf' },
   p: { paddingBottom: 4, textAlign: 'justify' },
   ul: { paddingBottom: 4, paddingLeft: 4, display: 'block' },
   ol: { paddingBottom: 4, paddingLeft: 4, display: 'block' },
@@ -183,7 +183,7 @@ export default function EbookPDF({ data }) {
               wrap
             >
               <Text fixed style={{position: 'absolute', top: 0, right: 42, width: 2, height: 172, backgroundColor: '#ff03f0'}}/>
-              <Image src='/logo.png' style={{position: 'absolute', top: 40, left: 0, right: 0, height: 192, objectFit: 'contain' }} />
+              <Image src='/logo-white.png' style={{position: 'absolute', top: 40, left: 0, right: 0, height: 80, objectFit: 'contain' }} />
               {segment.map((node, index) => renderNode(node, index))}
               <Text fixed style={{position: 'absolute', bottom: 62, left: 0, width: 42, height: 110, backgroundColor: '#ff03f0'}}/>
             </Page>
